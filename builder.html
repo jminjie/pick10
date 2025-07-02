@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pick 10 Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: top;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .grid-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grid input {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .grid input:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .grid input:hover {
+            border-color: #007bff;
+            background-color: white;
+        }
+
+        .controls {
+            text-align: center;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <h1>4x4 Number Grid</h1>
+        <div class="grid" id="numberGrid">
+            <!-- Grid will be populated by JavaScript -->
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="clearGrid()">Clear All</button>
+            <button class="btn" onclick="createLink()">Create Game</button>
+        </div>
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Create the 4x4 grid
+        function createGrid() {
+            const grid = document.getElementById('numberGrid');
+            
+            for (let i = 0; i < 16; i++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '1';
+                input.max = '9';
+                input.placeholder = '1';
+                input.value = '';
+                
+                // Add event listeners for better UX
+                input.addEventListener('keydown', function(e) {
+                    // Allow navigation keys
+                    if ([8, 9, 37, 38, 39, 40, 46].includes(e.keyCode)) {
+                        return;
+                    }
+                    
+                    // Allow numbers only
+                    if (e.keyCode >= 48 && e.keyCode <= 57) {
+                        return;
+                    }
+                    
+                    // Allow numpad numbers
+                    if (e.keyCode >= 96 && e.keyCode <= 105) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                });
+                
+                input.addEventListener('input', function() {
+                    // Limit to 1 digits
+                    if (this.value.length > 1) {
+                        this.value = this.value.slice(0, 1);
+                    }
+                    
+                    // Hide the result when user modifies the puzzle
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.style.display = 'none';
+                });
+                
+                // Handle touch/click to increment number
+                input.addEventListener('click', function() {
+                    incrementNumber(this);
+                });
+                
+                input.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    incrementNumber(this);
+                });
+                
+                grid.appendChild(input);
+            }
+        }
+
+        // Clear all inputs
+        function clearGrid() {
+            const inputs = document.querySelectorAll('#numberGrid input');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Hide the result when user modifies the puzzle
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+        }
+
+        // Increment number by 1, wrapping from 9 to 1
+        function incrementNumber(input) {
+            let currentValue = parseInt(input.value) || 0;
+            currentValue = currentValue + 1;
+            if (currentValue > 9) {
+                currentValue = 1;
+            }
+            input.value = currentValue;
+            
+            // Hide the result when user modifies the puzzle
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+        }
+
+        // Create link - display numbers in order without spaces
+        function createLink() {
+            const inputs = document.querySelectorAll('#numberGrid input');
+            let numbers = '';
+            
+            inputs.forEach(input => {
+                const value = input.value || '1';
+                numbers += value;
+            });
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "<a href=\"index.html?q=" + numbers + '">Game link</a>';
+            resultDiv.style.display = 'block';
+        }
+
+        // Initialize the grid when page loads
+        document.addEventListener('DOMContentLoaded', createGrid);
+    </script>
+</body>
+</html>

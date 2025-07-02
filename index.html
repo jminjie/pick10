@@ -58,6 +58,23 @@
       background: #ccc;
       cursor: not-allowed;
     }
+    .builder-link {
+      position: fixed;
+      bottom: 20px;
+      right: 120px;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+    }
+    .builder-link:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
@@ -66,14 +83,59 @@
   </div>
   <div id="overlay" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none;"></div>
   <button class="undo-button" id="undoButton" disabled>Undo</button>
+  <a href="builder.html" class="builder-link">Builder</a>
   <script>
-    // Initial 4x4 grid of numbers (customizable)
-    const gridNumbers = [
-      [5, 4, 1, 8],
-      [2, 8, 2, 3],
-      [2, 6, 2, 3],
-      [5, 1, 7, 1]
-    ];
+    // Print GET parameters when window loads
+    window.addEventListener('load', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log('GET Parameters:');
+      if (urlParams.toString() === '') {
+        console.log('No GET parameters found');
+      } else {
+        for (const [key, value] of urlParams.entries()) {
+          console.log(`${key}: ${value}`);
+        }
+      }
+    });
+
+    // Function to parse grid from GET parameter "q"
+    function parseGridFromQuery() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qParam = urlParams.get('q');
+      
+      if (qParam) {
+        try {
+          // Remove any non-digit characters and split into individual digits
+          const digits = qParam.replace(/[^0-9]/g, '').split('');
+          
+          // If we have exactly 16 digits, create the grid
+          if (digits.length === 16) {
+            const newGrid = [];
+            for (let i = 0; i < 4; i++) {
+              newGrid[i] = [];
+              for (let j = 0; j < 4; j++) {
+                const index = i * 4 + j;
+                newGrid[i][j] = parseInt(digits[index]) || 1;
+              }
+            }
+            return newGrid;
+          }
+        } catch (error) {
+          console.error('Error parsing grid from query parameter:', error);
+        }
+      }
+      
+      // Return default grid if no valid "q" parameter
+      return [
+        [5, 4, 1, 8],
+        [2, 8, 2, 3],
+        [2, 6, 2, 3],
+        [5, 1, 7, 1]
+      ];
+    }
+
+    // Initial 4x4 grid of numbers (from GET parameter "q" or default)
+    const gridNumbers = parseGridFromQuery();
 
     const grid = document.getElementById('numberGrid');
     const undoButton = document.getElementById('undoButton');
