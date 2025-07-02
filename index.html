@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4x4 Number Grid</title>
+  <title>Pick 10</title>
   <style>
+    html, body {
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: Arial, sans-serif;
       display: flex;
@@ -12,6 +17,7 @@
       align-items: center;
       height: 100vh;
       background: #f8f8f8;
+      position: relative;
     }
     .grid {
       display: grid;
@@ -31,16 +37,35 @@
       border-radius: 8px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
+    .undo-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+    }
+    .undo-button:hover {
+      background: #0056b3;
+    }
+    .undo-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
   <div class="grid" id="numberGrid">
     <!-- Grid cells will be inserted here by JavaScript -->
   </div>
-  <div style="position: fixed; top: 12px; left: 12px; background: rgba(255,255,255,0.85); padding: 6px 12px; border-radius: 6px; font-size: 0.95rem; color: #333; box-shadow: 0 1px 4px rgba(0,0,0,0.06); z-index: 1000;">
-    Press backspace to undo
-  </div>
   <div id="overlay" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none;"></div>
+  <button class="undo-button" id="undoButton" disabled>Undo</button>
   <script>
     // Initial 4x4 grid of numbers (customizable)
     const gridNumbers = [
@@ -51,6 +76,7 @@
     ];
 
     const grid = document.getElementById('numberGrid');
+    const undoButton = document.getElementById('undoButton');
     // Store cell divs for easy access
     const cellDivs = [];
     // Track active/inactive state for each number
@@ -74,6 +100,11 @@
 
     // Track all user rectangles and their numbers
     const rectangles = [];
+
+    // Function to update undo button state
+    function updateUndoButton() {
+      undoButton.disabled = rectangles.length === 0;
+    }
 
     // Helper to get grid's position relative to viewport
     function getGridRect() {
@@ -100,11 +131,54 @@
       overlay.style.pointerEvents = 'auto';
     });
 
+    // Touch events on the grid
+    grid.addEventListener('touchstart', (e) => {
+      e.preventDefault(); // Prevent default touch behavior
+      const touch = e.touches[0];
+      const gridRect = getGridRect();
+      startX = touch.clientX - gridRect.left;
+      startY = touch.clientY - gridRect.top;
+      drawing = true;
+      rect = document.createElement('div');
+      rect.style.position = 'absolute';
+      rect.style.left = `${startX + gridRect.left}px`;
+      rect.style.top = `${startY + gridRect.top}px`;
+      rect.style.width = '0px';
+      rect.style.height = '0px';
+      rect.style.borderRadius = '5px';
+      rect.style.background = 'rgba(0, 123, 255, 0.2)';
+      rect.style.border = '2px solid #007bff';
+      rect.style.pointerEvents = 'none';
+      overlay.appendChild(rect);
+      overlay.style.pointerEvents = 'auto';
+    });
+
     window.addEventListener('mousemove', (e) => {
       if (!drawing || !rect) return;
       const gridRect = getGridRect();
       let currX = e.clientX - gridRect.left;
       let currY = e.clientY - gridRect.top;
+      // Clamp to grid bounds
+      currX = Math.max(0, Math.min(currX, gridRect.width));
+      currY = Math.max(0, Math.min(currY, gridRect.height));
+      const x = Math.min(startX, currX);
+      const y = Math.min(startY, currY);
+      const w = Math.abs(currX - startX);
+      const h = Math.abs(currY - startY);
+      rect.style.left = `${x + gridRect.left}px`;
+      rect.style.top = `${y + gridRect.top}px`;
+      rect.style.width = `${w}px`;
+      rect.style.height = `${h}px`;
+    });
+
+    // Touch move event
+    window.addEventListener('touchmove', (e) => {
+      if (!drawing || !rect) return;
+      e.preventDefault(); // Prevent scrolling while drawing
+      const touch = e.touches[0];
+      const gridRect = getGridRect();
+      let currX = touch.clientX - gridRect.left;
+      let currY = touch.clientY - gridRect.top;
       // Clamp to grid bounds
       currX = Math.max(0, Math.min(currX, gridRect.width));
       currY = Math.max(0, Math.min(currY, gridRect.height));
@@ -178,6 +252,87 @@
           // Save this rectangle for undo, including the rectangle element
           rectangles.push({ coords: selectedCoords, numbers: selectedNumbers, rectElem: rect });
           rect = null; // Don't remove the rectangle element
+          updateUndoButton();
+        } else {
+          // Remove the rectangle if not a valid selection
+          if (rect) {
+            overlay.removeChild(rect);
+            rect = null;
+          }
+        }
+      }
+    });
+
+    // Touch end event
+    window.addEventListener('touchend', (e) => {
+      if (drawing) {
+        drawing = false;
+        overlay.style.pointerEvents = 'none';
+
+        // Calculate rectangle bounds relative to grid
+        const gridRect = getGridRect();
+        let endX = startX; // Default to start position if no touch move
+        let endY = startY;
+        
+        // If there was a touch move, use the last touch position
+        if (e.changedTouches && e.changedTouches.length > 0) {
+          const touch = e.changedTouches[0];
+          endX = touch.clientX - gridRect.left;
+          endY = touch.clientY - gridRect.top;
+        }
+        
+        // Clamp to grid bounds
+        endX = Math.max(0, Math.min(endX, gridRect.width));
+        endY = Math.max(0, Math.min(endY, gridRect.height));
+        const x1 = Math.min(startX, endX);
+        const y1 = Math.min(startY, endY);
+        const x2 = Math.max(startX, endX);
+        const y2 = Math.max(startY, endY);
+
+        // Get cell size
+        const cellWidth = gridRect.width / 4;
+        const cellHeight = gridRect.height / 4;
+        const selectedNumbers = [];
+        const selectedCells = [];
+        const selectedCoords = [];
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 4; col++) {
+            // Only consider active numbers
+            if (!isActive[row][col]) continue;
+            // Cell center
+            const cellCenterX = (col + 0.5) * cellWidth;
+            const cellCenterY = (row + 0.5) * cellHeight;
+            if (
+              cellCenterX >= x1 && cellCenterX <= x2 &&
+              cellCenterY >= y1 && cellCenterY <= y2
+            ) {
+              selectedNumbers.push(gridNumbers[row][col]);
+              selectedCells.push(cellDivs[row][col]);
+              selectedCoords.push([row, col]);
+            }
+          }
+        }
+        console.log('Numbers inside rectangle:', selectedNumbers);
+
+        // Reset color of all active cells
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 4; col++) {
+            if (isActive[row][col]) {
+              cellDivs[row][col].style.color = '';
+            }
+          }
+        }
+        // If sum is 10, color selected cells and mark as inactive
+        const sum = selectedNumbers.reduce((a, b) => a + b, 0);
+        if (sum === 10) {
+          selectedCoords.forEach(([row, col]) => {
+            cellDivs[row][col].style.color = 'lightgray';
+            isActive[row][col] = false;
+          });
+          // Save this rectangle for undo, including the rectangle element
+          rectangles.push({ coords: selectedCoords, numbers: selectedNumbers, rectElem: rect });
+          rect = null; // Don't remove the rectangle element
+          updateUndoButton();
         } else {
           // Remove the rectangle if not a valid selection
           if (rect) {
@@ -192,17 +347,30 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Backspace' && rectangles.length > 0) {
         e.preventDefault();
-        const last = rectangles.pop();
-        last.coords.forEach(([row, col]) => {
-          isActive[row][col] = true;
-          cellDivs[row][col].style.color = '';
-        });
-        // Remove the rectangle element from the overlay
-        if (last.rectElem && overlay.contains(last.rectElem)) {
-          overlay.removeChild(last.rectElem);
-        }
+        undoLastRectangle();
       }
     });
+
+    // Undo button click handler
+    undoButton.addEventListener('click', () => {
+      if (rectangles.length > 0) {
+        undoLastRectangle();
+      }
+    });
+
+    // Function to undo the last rectangle
+    function undoLastRectangle() {
+      const last = rectangles.pop();
+      last.coords.forEach(([row, col]) => {
+        isActive[row][col] = true;
+        cellDivs[row][col].style.color = '';
+      });
+      // Remove the rectangle element from the overlay
+      if (last.rectElem && overlay.contains(last.rectElem)) {
+        overlay.removeChild(last.rectElem);
+      }
+      updateUndoButton();
+    }
   </script>
 </body>
 </html> 
