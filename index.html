@@ -45,8 +45,8 @@
       color: white;
       border: none;
       border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 16px;
+      padding: 16px 28px;
+      font-size: 18px;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       transition: background-color 0.2s;
@@ -60,20 +60,37 @@
     }
     .builder-link {
       position: fixed;
-      bottom: 20px;
-      right: 120px;
+      top: 20px;
+      left: 20px;
       background: #28a745;
       color: white;
       text-decoration: none;
       border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 16px;
+      padding: 10px 16px;
+      font-size: 14px;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       transition: background-color 0.2s;
     }
     .builder-link:hover {
       background: #218838;
+    }
+    .github-link {
+      position: fixed;
+      top: 20px;
+      left: 120px;
+      background: #333;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+    }
+    .github-link:hover {
+      background: #555;
     }
   </style>
 </head>
@@ -84,6 +101,7 @@
   <div id="overlay" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none;"></div>
   <button class="undo-button" id="undoButton" disabled>Undo</button>
   <a href="builder.html" class="builder-link">Builder</a>
+  <a href="https://github.com/jminjie/pick10" class="github-link" target="_blank">Source</a>
   <script>
     // Print GET parameters when window loads
     window.addEventListener('load', () => {
