@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Pick 10</title>
   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
@@ -218,7 +218,6 @@
 
     // Touch events on the grid
     grid.addEventListener('touchstart', (e) => {
-      e.preventDefault(); // Prevent default touch behavior
       const touch = e.touches[0];
       const gridRect = getGridRect();
       startX = touch.clientX - gridRect.left;
@@ -259,7 +258,6 @@
     // Touch move event
     window.addEventListener('touchmove', (e) => {
       if (!drawing || !rect) return;
-      e.preventDefault(); // Prevent scrolling while drawing
       const touch = e.touches[0];
       const gridRect = getGridRect();
       let currX = touch.clientX - gridRect.left;
