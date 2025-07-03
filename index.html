@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
   <link rel="manifest" href="img/site.webmanifest">
+  <script type="text/javascript" src="confetti.min.js"></script>
   <style>
     html, body {
       overflow: hidden;
@@ -349,6 +350,13 @@
           selectedCoords.forEach(([row, col]) => {
             cellDivs[row][col].style.color = 'lightgray';
             isActive[row][col] = false;
+            if (wonTheGame(isActive)) {
+              confetti({
+                  particleCount: 100,
+                  spread: 70,
+                  origin: { y: 0.6 },
+              });
+            }
           });
           // Save this rectangle for undo, including the rectangle element
           rectangles.push({ coords: selectedCoords, numbers: selectedNumbers, rectElem: rect });
@@ -429,6 +437,13 @@
           selectedCoords.forEach(([row, col]) => {
             cellDivs[row][col].style.color = 'lightgray';
             isActive[row][col] = false;
+            if (wonTheGame(isActive)) {
+              confetti({
+                  particleCount: 100,
+                  spread: 70,
+                  origin: { y: 0.6 },
+              });
+            }
           });
           // Save this rectangle for undo, including the rectangle element
           rectangles.push({ coords: selectedCoords, numbers: selectedNumbers, rectElem: rect });
@@ -471,6 +486,15 @@
         overlay.removeChild(last.rectElem);
       }
       updateUndoButton();
+    }
+
+    function wonTheGame(isActive) {
+      for (let i=0; i < 4; i++) {
+        for (let j=0; j < 4; j++) {
+          if (isActive[i][j]) return false;
+        }
+      }
+      return true;
     }
   </script>
 </body>
