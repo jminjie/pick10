@@ -154,11 +154,7 @@
                     resultDiv.style.display = 'none';
                 });
                 
-                // Handle touch/click to increment number
-                input.addEventListener('click', function() {
-                    incrementNumber(this);
-                });
-                
+                // Handle touch to increment number
                 input.addEventListener('touchend', function(e) {
                     e.preventDefault();
                     incrementNumber(this);
