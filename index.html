@@ -25,12 +25,6 @@
       background: #f8f8f8;
       position: relative;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 60px);
-      grid-template-rows: repeat(4, 60px);
-      gap: 10px;
-    }
     .cell {
       display: flex;
       justify-content: center;
@@ -138,41 +132,66 @@
           console.log(`${key}: ${value}`);
         }
       }
+      const r = getRows();
+      const c = getCols();
+      document.querySelector('.grid').style.display = "grid";
+      document.querySelector('.grid').style.gridTemplateRows = `repeat(${r}, 60px)`;
+      document.querySelector('.grid').style.gridTemplateColumns = `repeat(${c}, 60px)`;
+      document.querySelector('.grid').style.gap = "10px";
     });
+
+    function getRows() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('r')) {
+        return urlParams.get('r');
+      } else {
+        return 4;
+      }
+    }
+
+    function getCols() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('c')) {
+        return urlParams.get('c');
+      } else {
+        return 4;
+      }
+    }
 
     // Function to parse grid from GET parameter "q"
     function parseGridFromQuery() {
       const urlParams = new URLSearchParams(window.location.search);
       const qParam = urlParams.get('q');
+      const r = getRows();
+      const c = getCols();
       
       if (qParam) {
-        try {
-          // Remove any non-digit characters and split into individual digits
-          const digits = qParam.replace(/[^0-9]/g, '').split('');
-          
-          // If we have exactly 16 digits, create the grid
-          if (digits.length === 16) {
-            const newGrid = [];
-            for (let i = 0; i < 4; i++) {
-              newGrid[i] = [];
-              for (let j = 0; j < 4; j++) {
-                const index = i * 4 + j;
-                newGrid[i][j] = parseInt(digits[index]) || 1;
-              }
+        // Remove any non-digit characters and split into individual digits
+        const digits = qParam.replace(/[^0-9]/g, '').split('');
+        
+        // If we have the right number of digits, create the grid
+        if (digits.length === r*c) {
+          const newGrid = [];
+          for (let i = 0; i < r; i++) {
+            newGrid[i] = [];
+            for (let j = 0; j < c; j++) {
+              const index = i * r + j;
+              newGrid[i][j] = parseInt(digits[index]) || 1;
             }
-            return newGrid;
           }
-        } catch (error) {
+          return newGrid;
+        } else {
           console.error('Error parsing grid from query parameter:', error);
         }
       }
       
       // Return default grid if no valid "q" parameter
       return [
-        [5, 4, 1, 8],
-        [2, 8, 2, 3],
-        [2, 6, 2, 3],
-        [5, 1, 7, 1]
+        [5, 4, 1, 8, 1],
+        [2, 8, 2, 3, 8],
+        [2, 6, 2, 3, 1],
+        [5, 1, 7, 1, 6],
+        [4, 2, 2, 2, 4]
       ];
     }
 
@@ -184,7 +203,9 @@
     // Store cell divs for easy access
     const cellDivs = [];
     // Track active/inactive state for each number
-    const isActive = Array.from({ length: 4 }, () => Array(4).fill(true));
+    const isActive = Array.from({ length: getRows()}, () =>
+      Array.from({ length: getCols()}, () => true)
+    );
     gridNumbers.forEach((row, rowIndex) => {
       row.forEach((num, colIndex) => {
         const cell = document.createElement('div');
@@ -312,15 +333,17 @@
         const y2 = Math.max(startY, endY);
 
         // Get cell size
-        const cellWidth = gridRect.width / 4;
-        const cellHeight = gridRect.height / 4;
+        const cellWidth = gridRect.width / getCols();
+        const cellHeight = gridRect.height / getRows();
         const selectedNumbers = [];
         const selectedCells = [];
         const selectedCoords = [];
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
+        for (let row = 0; row < getRows(); row++) {
+          for (let col = 0; col < getCols(); col++) {
             // Only consider active numbers
-            if (!isActive[row][col]) continue;
+            if (!isActive[row][col]) {
+              continue;
+            }
             // Cell center
             const cellCenterX = (col + 0.5) * cellWidth;
             const cellCenterY = (row + 0.5) * cellHeight;
@@ -337,8 +360,8 @@
         console.log('Numbers inside rectangle:', selectedNumbers);
 
         // Reset color of all active cells
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
+        for (let row = 0; row < getRows(); row++) {
+          for (let col = 0; col < getCols(); col++) {
             if (isActive[row][col]) {
               cellDivs[row][col].style.color = '';
             }
@@ -399,13 +422,13 @@
         const y2 = Math.max(startY, endY);
 
         // Get cell size
-        const cellWidth = gridRect.width / 4;
-        const cellHeight = gridRect.height / 4;
+        const cellWidth = gridRect.width / getCols();
+        const cellHeight = gridRect.height / getRows();
         const selectedNumbers = [];
         const selectedCells = [];
         const selectedCoords = [];
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
+        for (let row = 0; row < getRows(); row++) {
+          for (let col = 0; col < getCols(); col++) {
             // Only consider active numbers
             if (!isActive[row][col]) continue;
             // Cell center
@@ -424,8 +447,8 @@
         console.log('Numbers inside rectangle:', selectedNumbers);
 
         // Reset color of all active cells
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
+        for (let row = 0; row < getRows(); row++) {
+          for (let col = 0; col < getCols(); col++) {
             if (isActive[row][col]) {
               cellDivs[row][col].style.color = '';
             }
@@ -489,8 +512,8 @@
     }
 
     function wonTheGame(isActive) {
-      for (let i=0; i < 4; i++) {
-        for (let j=0; j < 4; j++) {
+      for (let i=0; i < getRows(); i++) {
+        for (let j=0; j < getCols(); j++) {
           if (isActive[i][j]) return false;
         }
       }
