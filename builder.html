@@ -104,65 +104,67 @@
             <!-- Grid will be populated by JavaScript -->
         </div>
         <div class="controls">
+            <button class="btn" onclick="addRowColumn()">+</button>
+            <button class="btn" onclick="removeRowColumn()">-</button>
+<br>
+<br>
             <button class="btn" onclick="clearGrid()">Clear All</button>
             <button class="btn" onclick="createLink()">Create Game</button>
+
         </div>
         <div id="result" class="result" style="display: none;"></div>
     </div>
 
     <script>
-        // Create the 4x4 grid
-        function createGrid() {
-            const grid = document.getElementById('numberGrid');
-            
-            for (let i = 0; i < 16; i++) {
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.min = '1';
-                input.max = '9';
-                input.placeholder = '1';
-                input.value = '';
-                
-                // Add event listeners for better UX
-                input.addEventListener('keydown', function(e) {
-                    // Allow navigation keys
-                    if ([8, 9, 37, 38, 39, 40, 46].includes(e.keyCode)) {
-                        return;
-                    }
-                    
-                    // Allow numbers only
-                    if (e.keyCode >= 48 && e.keyCode <= 57) {
-                        return;
-                    }
-                    
-                    // Allow numpad numbers
-                    if (e.keyCode >= 96 && e.keyCode <= 105) {
-                        return;
-                    }
-                    
-                    e.preventDefault();
-                });
-                
-                input.addEventListener('input', function() {
-                    // Limit to 1 digits
-                    if (this.value.length > 1) {
-                        this.value = this.value.slice(0, 1);
-                    }
-                    
-                    // Hide the result when user modifies the puzzle
-                    const resultDiv = document.getElementById('result');
-                    resultDiv.style.display = 'none';
-                });
-                
-                // Handle touch to increment number
-                input.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    incrementNumber(this);
-                });
-                
-                grid.appendChild(input);
-            }
+    let gridSize = 4; // Start with 4x4
+
+    function createGrid() {
+        const grid = document.getElementById('numberGrid');
+        grid.innerHTML = ''; // Clear existing
+
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.max = '9';
+            input.placeholder = '1';
+            input.value = '';
+
+            input.addEventListener('keydown', function(e) {
+                if ([8, 9, 37, 38, 39, 40, 46].includes(e.keyCode)) return;
+                if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) return;
+                e.preventDefault();
+            });
+
+            input.addEventListener('input', function() {
+                if (this.value.length > 1) {
+                    this.value = this.value.slice(0, 1);
+                }
+                document.getElementById('result').style.display = 'none';
+            });
+
+            input.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                incrementNumber(this);
+            });
+
+            grid.appendChild(input);
         }
+
+        grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    }
+
+    function addRowColumn() {
+        gridSize += 1;
+        createGrid();
+    }
+
+    function removeRowColumn() {
+        if (gridSize > 1) {
+            gridSize -= 1;
+            createGrid();
+        }
+    }
 
         // Clear all inputs
         function clearGrid() {
@@ -201,7 +203,7 @@
             });
             
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = "<a href=\"index.html?q=" + numbers + '">Game link</a>';
+            resultDiv.innerHTML = `<a href="index.html?r=${gridSize}&c=${gridSize}&q=${numbers}">Game link</a>`;
             resultDiv.style.display = 'block';
         }
 
