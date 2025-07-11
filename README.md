@@ -31,13 +31,14 @@ The game includes a built-in puzzle builder (`builder.html`) that allows you to:
 
 ## 🔗 URL Parameters
 
-The game supports a `q` parameter for custom puzzles:
+The game supports a `q`, `r` and `c` parameters for custom puzzles:
 
 ```
-index.html?q=5418282326235171
+index.html?q=5418282326235171&r=4&c=4
 ```
 
-The `q` parameter should contain exactly 16 digits representing the grid from left to right, top to bottom.
+The `q` parameter represents the grid from left to right, top to bottom.
+If `r` and `c` are not provided, the standard 4x4 size is assumed.
 
 ## 🎨 Technical Details
 
