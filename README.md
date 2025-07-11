@@ -1,6 +1,6 @@
 # Pick 10
 
-A web-based puzzle game where players select groups of numbers that sum to exactly 10. This game was entirely coded by AI.
+A web-based puzzle game where players select groups of numbers that sum to exactly 10. This game was (mostly) coded by AI.
 
 [Live demo](https://jminjie.github.io/pick10/)
 
@@ -24,7 +24,7 @@ A web-based puzzle game where players select groups of numbers that sum to exact
 
 The game includes a built-in puzzle builder (`builder.html`) that allows you to:
 
-- **Create Custom Grids**: Input your own 4x4 number arrangements
+- **Create Custom Grids**: Input your own number arrangements
 - **Mobile Input**: Tap cells on mobile to increment numbers (1-9, wraps to 1)
 - **Generate Links**: Create shareable URLs for your custom puzzles
 - **Clear Function**: Reset the entire grid with one click
@@ -46,7 +46,6 @@ If `r` and `c` are not provided, the standard 4x4 size is assumed.
 - **Responsive Design**: Works on desktop and mobile
 - **Touch Events**: Native touch support for mobile devices
 - **Keyboard Support**: Backspace key for undo functionality
-- **Visual Polish**: Smooth animations and hover effects
 
 ## 🚀 Getting Started
 
@@ -57,7 +56,7 @@ If `r` and `c` are not provided, the standard 4x4 size is assumed.
 
 ## 📱 Browser Compatibility
 
-- Chrome (recommended)
+- Chrome
 - Firefox
 - Safari
 - Edge
