@@ -194,165 +194,17 @@
 
         // Create link - display numbers in order without spaces
         function createLink() {
-            const solution = solveCurrentPuzzle();
-
             const inputs = document.querySelectorAll('#numberGrid input');
             let numbers = '';
             
-            const resultDiv = document.getElementById('result');
-            if(solution) {
-                inputs.forEach(input => {
-                    const value = input.value || '1';
-                    numbers += value;
-                });
-                resultDiv.innerHTML = `<a href="index.html?r=${gridSize}&c=${gridSize}&q=${numbers}">Game link</a>`;
-            } else {
-                resultDiv.innerHTML = `<p>unsolvable puzzle, try again!</p>`
-            }
-            resultDiv.style.display = 'block';
-        }
-
-        // create 2D array from current puzzle
-        function getGrid() {
-            const inputs = document.querySelectorAll('#numberGrid input');
-            let numbers = [];
-            let row = [];
-            let i = 0;
-
             inputs.forEach(input => {
                 const value = input.value || '1';
-                const parsedValue = parseInt(value);
-                if(parsedValue <= 0 || parsedValue > 9) {
-                    console.log('invalid number', value);
-                }
-                row.push(parsedValue);
-                i ++;
-                if(i == gridSize) {
-                    i = 0;
-                    numbers.push(row);
-                    row = []
-                }
+                numbers += value;
             });
-            return numbers;
-        }
-
-        // check to see what a new box will add up to
-        function total(puzzle, used, r0, c0, r1, c1) {
-            let sum = 0;
-            for (let r = r0; r <= r1; r ++) {
-                for (let c = c0; c <= c1; c ++) {
-                    let u = used[r][c];
-                    if(u === 0) {
-                        sum += puzzle[r][c];
-                    }
-                }
-            }
-            console.debug('total', sum, typeof sum, used, puzzle);
-            return sum;
-        }
-
-        // try adding a box to the current solution.
-        // returns true and updates `used` if the new box adds up to 10
-        function applyMove(puzzle, used, i, r0, c0, r1, c1) {
-            if(total(puzzle, used, r0, c0, r1, c1) === 10) {
-                for (let r = r0; r <= r1; r ++) {
-                    for (let c = c0; c <= c1; c ++) {
-                        if(used[r][c] === 0) {
-                            used[r][c] = i;
-                        }
-                    }
-                }
-                return true;
-            }
-            return false;
-        }
-
-        function undoMove(used, i) {
-            console.debug('backtracking', used, i);
-            for (let r = 0; r < gridSize; r ++) {
-                for (let c = 0; c < gridSize; c ++) {
-                    if(used[r][c] === i) {
-                        used[r][c] = 0;
-                    }
-                }
-            }
-        }
-
-        function isSolved(used) {
-            for (let r = 0; r < gridSize; r ++) {
-                for (let c = 0; c < gridSize; c ++) {
-                    if(used[r][c] === 0) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        // get coordinates of all cells that aren't covered by boxes yet
-        function getOpenSpaces(used) {
-            let openSpaces = [];
-            for (let r = 0; r < gridSize; r ++) {
-                for (let c = 0; c < gridSize; c ++) {
-                    if(used[r][c] === 0) {
-                        openSpaces.push([r,c]);
-                    }
-                }
-            }
-            return openSpaces;
-        }
-
-        function newEmptyUsed() {
-            let used = []
-            for (let r = 0; r < gridSize; r ++) {
-                let newRow = Array(gridSize).fill(0);
-                used.push(newRow);
-            }
-            return used;
-        }
-
-        // find one solution to a puzzle
-        function solve(puzzle, used, i) {
-            let os = getOpenSpaces(used);
-            let boxStarts = [];
-            let boxEnds = [];
-            // could do some deduplication here
-            os.forEach(cell1 => {
-                os.forEach(cell2 => {
-                    boxStarts.push(cell1);
-                    boxEnds.push(cell2);
-                })
-            })
-            for (let bi = 0; bi < boxStarts.length; bi ++) {
-                let r0 = boxStarts[bi][0];
-                let c0 = boxStarts[bi][1];
-                let r1 = boxEnds[bi][0];
-                let c1 = boxEnds[bi][1];
-
-                if(r0 === r1 && c0 === c1) {
-                    continue;
-                }
-                console.debug('attempting ', r0, c0, r1, c1);
-                am = applyMove(puzzle, used, i, r0, c0, r1, c1);
-                if (!am) {
-                    console.debug('not a good move, skipping');
-                    continue;
-                }
-                solve(puzzle, used, i + 1);
-                if(isSolved(used)) {
-                    console.debug('solved!', used);
-                    return used;
-                }
-                undoMove(used, i);
-            }
-            console.debug('no solutions exist');
-            return null;
-        }
-
-        function solveCurrentPuzzle() {
-            let used = newEmptyUsed();
-            let puzzle = getGrid();
-            return solve(puzzle, used, 1);
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<a href="index.html?r=${gridSize}&c=${gridSize}&q=${numbers}">Game link</a>`;
+            resultDiv.style.display = 'block';
         }
 
         // Initialize the grid when page loads
